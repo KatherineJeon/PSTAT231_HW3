@@ -1,0 +1,118 @@
+---
+title: "HW3"
+output: html_document
+date: '2022-04-17'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Importing data and laoding necessary packages.
+```{r}
+titanic <- read.csv(file = 'data/titanic.csv')
+library(ggplot2)
+library(tidymodels)
+library(tidyverse)
+library(corrr)
+set.seed(45)
+```
+
+Changing some variables into factors.
+```{r}
+titanic$survived <- factor(titanic$survived, levels = c('Yes', 'No'))
+titanic$pclass <- factor(titanic$pclass)
+levels(titanic$survived)
+```
+
+
+## Question 1
+
+```{r}
+titanic_split <- initial_split(titanic, prop = 0.8,
+                                strata = survived)
+titanic_train <- training(titanic_split)
+titanic_test <- testing(titanic_split)
+```
+
+```{r}
+head(titanic_train)
+```
+
+```{r}
+sum(is.na(titanic_train))
+mean(is.na(titanic_train))
+```
+
+
+Since we are trying to train the model to predict 'survived' factor, We need to see each data with the same ratio with the original data.
+
+## Question 2
+
+```{r}
+ggplot(titanic, aes(x = survived)) + geom_bar()
+```
+
+
+## Question 3
+```{r}
+cor_titanic <- titanic_train %>%
+  select(is.numeric) %>%
+  correlate()
+cor_titanic
+```
+
+```{r}
+rplot(cor_titanic)
+```
+
+
+
+## Question 4
+
+```{r}
+
+```
+
+
+## Question 5
+
+```{r}
+
+```
+
+
+## Question 6
+
+```{r}
+
+```
+
+
+## Question 7
+
+```{r}
+
+```
+
+
+## Question 8
+
+```{r}
+
+```
+
+
+## Question 9
+
+```{r}
+
+```
+
+
+## Question 10
+
+```{r}
+
+```
+
