@@ -50,7 +50,7 @@ Since we are trying to train the model to predict 'survived' factor, We need to 
 ## Question 2
 
 ```{r}
-ggplot(titanic, aes(x = survived)) + geom_bar()
+ggplot(titanic_train, aes(x = survived)) + geom_bar()
 ```
 
 
@@ -71,28 +71,58 @@ rplot(cor_titanic)
 ## Question 4
 
 ```{r}
-
+titanic_recipe <- recipe(survived ~ pclass + sex + age + sib_sp + parch + fare , data = titanic_train) %>%
+  step_impute_linear() %>%
+  step_dummy(all_nominal_predictors()) %>%
+  step_interact(terms = ~ starts_with("sex"):fare + age:fare)
 ```
 
 
 ## Question 5
 
 ```{r}
+glm_model <- linear_reg() %>% 
+  set_engine("glm")
 
+glm_model
+```
+
+```{r}
+glm_wflow <- workflow() %>% 
+add_model(glm_model) %>% 
+  add_recipe(titanic_recipe)
+
+glm_fit <- fit(glm_wflow, titanic_train)
 ```
 
 
 ## Question 6
 
 ```{r}
+lda_mod <- discrim_linear() %>% 
+  set_mode("classification") %>% 
+  set_engine("MASS")
 
+lda_wkflow <- workflow() %>% 
+  add_model(lda_mod) %>% 
+  add_recipe(titanic_recipe)
+
+lda_fit <- fit(lda_wkflow, titanic_train)
 ```
 
 
 ## Question 7
 
 ```{r}
+qda_mod <- discrim_quad() %>% 
+  set_mode("classification") %>% 
+  set_engine("MASS")
 
+qda_wkflow <- workflow() %>% 
+  add_model(qda_mod) %>% 
+  add_recipe(titanic_recipe)
+
+qda_fit <- fit(qda_wkflow, titanic_train)
 ```
 
 
@@ -115,4 +145,3 @@ rplot(cor_titanic)
 ```{r}
 
 ```
-
