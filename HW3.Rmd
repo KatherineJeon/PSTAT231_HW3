@@ -8,13 +8,14 @@ date: '2022-04-17'
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-Importing data and laoding necessary packages.
+Importing data and loading necessary packages.
 ```{r}
 titanic <- read.csv(file = 'data/titanic.csv')
 library(ggplot2)
 library(tidymodels)
 library(tidyverse)
 library(corrr)
+library(discrim)
 set.seed(45)
 ```
 
@@ -72,7 +73,7 @@ rplot(cor_titanic)
 
 ```{r}
 titanic_recipe <- recipe(survived ~ pclass + sex + age + sib_sp + parch + fare , data = titanic_train) %>%
-  step_impute_linear() %>%
+  step_impute_linear(age) %>%
   step_dummy(all_nominal_predictors()) %>%
   step_interact(terms = ~ starts_with("sex"):fare + age:fare)
 ```
@@ -81,18 +82,21 @@ titanic_recipe <- recipe(survived ~ pclass + sex + age + sib_sp + parch + fare ,
 ## Question 5
 
 ```{r}
-glm_model <- linear_reg() %>% 
-  set_engine("glm")
+glm_model <- logistic_reg() %>% 
+  set_engine("glm") %>%
+  set_mode("classification")
 
 glm_model
 ```
 
 ```{r}
 glm_wflow <- workflow() %>% 
-add_model(glm_model) %>% 
+  add_model(glm_model) %>% 
   add_recipe(titanic_recipe)
 
 glm_fit <- fit(glm_wflow, titanic_train)
+glm_fit %>%
+  tidy()
 ```
 
 
@@ -129,6 +133,7 @@ qda_fit <- fit(qda_wkflow, titanic_train)
 ## Question 8
 
 ```{r}
+library(klaR)
 nb_mod <- naive_Bayes() %>% 
   set_mode("classification") %>% 
   set_engine("klaR") %>% 
@@ -145,12 +150,58 @@ nb_fit <- fit(nb_wkflow, titanic_train)
 ## Question 9
 
 ```{r}
+log_reg_acc <- augment(glm_fit, new_data = titanic_train) %>%
+  accuracy(truth = survived, estimate = .pred_class)
 
+lda_acc <- augment(lda_fit, new_data = titanic_train) %>%
+  accuracy(truth = survived, estimate = .pred_class)
+
+qda_acc <- augment(qda_fit, new_data = titanic_train) %>%
+  accuracy(truth = survived, estimate = .pred_class)
+
+nb_acc <- augment(nb_fit, new_data = titanic_train) %>%
+  accuracy(truth = survived, estimate = .pred_class)
+
+
+
+accuracies <- c(log_reg_acc$.estimate, lda_acc$.estimate, 
+                nb_acc$.estimate, qda_acc$.estimate)
+models <- c("Logistic Regression", "LDA", "Naive Bayes", "QDA")
+results <- tibble(accuracies = accuracies, models = models)
+results %>% 
+  arrange(-accuracies)
 ```
 
 
 ## Question 10
 
 ```{r}
+predict(glm_fit, new_data = titanic_test, type = "prob")
 
+multi_metric <- metric_set(accuracy, sensitivity, specificity)
+
+augment(nb_fit, new_data = titanic_test) %>%
+  multi_metric(truth = survived, estimate = .pred_class)
+
+
+augment(glm_fit, new_data = titanic_test) %>%
+  roc_curve(survived, .pred_Yes) %>%
+  autoplot()
 ```
+
+
+## Question 11
+$$
+\begin{aligned}
+p &= \frac{e^z} {1 + e^z} \\
+&= 1 - \frac{1} {1 + e^z} \\
+1 - p &= \frac{1} {1 + e^z} \\
+1 + e^z &= \frac{1} {1 - p}  = \frac{1 -p} {1-p} + \frac{p} {1 - p}\\
+e^z &= \frac{p} {1-p} \\
+z &= log\frac{p} {1 - p} \\
+z(p) &= ln(\frac{p} {1 - p})
+\end{aligned}
+$$
+
+
+## Question 12
