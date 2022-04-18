@@ -54,6 +54,8 @@ Since we are trying to train the model to predict 'survived' factor, We need to 
 ggplot(titanic_train, aes(x = survived)) + geom_bar()
 ```
 
+According to the graph, 'Yes' takes up about 40% of the data and 'No' takes up about 60%.
+
 
 ## Question 3
 ```{r}
@@ -67,6 +69,7 @@ cor_titanic
 rplot(cor_titanic)
 ```
 
+According to visualized plot, one of the distinctive relationships is the correlation between family-related values and age. This can be explained by the general life-cycle because people are less likely to have siblings, spouse, parents, and children aboard with them as they become older. I think mid-aged or elderly people are more likely to travel with their family members. Considering many circumstances that can happen in person's life, the number of direct family members that can go on a cruise trip with would decrease. And in same sense, 'sib_sp' and 'parch' variables have positive correlation because both indicate the number of direct family member aboard. 
 
 
 ## Question 4
