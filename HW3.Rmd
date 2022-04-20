@@ -185,7 +185,7 @@ qda_acc <- augment(qda_fit, new_data = titanic_train) %>%
 nb_acc <- augment(nb_fit, new_data = titanic_train) %>%
   accuracy(truth = survived, estimate = .pred_class)
 
-accuracies <- c(log_reg_acc$.estimate, lda_acc$.estimate, 
+accuracies <- c(glm_acc$.estimate, lda_acc$.estimate, 
                 nb_acc$.estimate, qda_acc$.estimate)
 models <- c("Logistic Regression", "LDA", "Naive Bayes", "QDA")
 results <- tibble(accuracies = accuracies, models = models)
